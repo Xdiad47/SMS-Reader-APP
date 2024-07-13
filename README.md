@@ -24,6 +24,4 @@ The app requires the following permissions:
 
 ## Setup
 1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/your-username/sms-reader-android.git
-   cd sms-reader-android
+https://github.com/Xdiad47/SMS-Reader-APP/tree/master
