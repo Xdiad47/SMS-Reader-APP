@@ -25,3 +25,6 @@ The app requires the following permissions:
 ## Setup
 1. **Clone the Repository**:
 https://github.com/Xdiad47/SMS-Reader-APP/tree/master
+
+## Download the APK file
+APK named as app-debug.apk
