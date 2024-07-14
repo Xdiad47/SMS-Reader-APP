@@ -2,30 +2,77 @@ package com.example.smsreader
 
 
 import android.Manifest
-import android.accounts.AccountManager
-import android.content.Context
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
-import android.telephony.TelephonyManager
-import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
+
+
+    private lateinit var smsRecyclerView: RecyclerView
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
+        //smsDisplayTextView = findViewById(R.id.smsDisplayTextView)
+
+        smsRecyclerView = findViewById(R.id.smsRecyclerView)
+        smsRecyclerView.layoutManager = LinearLayoutManager(this)
+
 
         checkAndRequestPermissions()
-        getDeviceInfo(this)
+        //getDeviceInfo(this)
 
 
     }
 
+
+    private fun checkAndRequestPermissions() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_SMS), 101)
+        } else {
+            loadSmsMessages()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 101 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            loadSmsMessages()
+        }
+    }
+
+
+    private fun loadSmsMessages() {
+        val uriSms = Uri.parse("content://sms/inbox")
+        val cursor = contentResolver.query(uriSms, null, null, null, null)
+        val smsList = mutableListOf<SmsMessage>()
+
+        cursor?.use {
+            val indexAddress = it.getColumnIndex("address")
+            val indexBody = it.getColumnIndex("body")
+            while (it.moveToNext()) {
+                val address = it.getString(indexAddress)  // Phone number
+                val body = it.getString(indexBody)
+                smsList.add(SmsMessage(address, body))
+            }
+        }
+
+        smsRecyclerView.adapter = SmsAdapter(smsList)
+    }
+
+
+    data class SmsMessage(val address: String, val body: String)
+
+
+    /*
     private fun checkAndRequestPermissions() {
         val permissionsNeeded = listOf(
             Manifest.permission.RECEIVE_SMS,
@@ -45,17 +92,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-   /* private fun getDeviceInfo(context: Context) {
-        val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
-        val simSerialNumber = telephonyManager.simSerialNumber
-
-        val accountManager = AccountManager.get(context)
-        val accounts = accountManager.getAccountsByType("com.google")
-        for (account in accounts) {
-            val accountName = account.name
-            // Use the information as needed, like displaying or logging
-        }
-    }*/
 
     private fun getDeviceInfo(context: Context) {
         val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
@@ -113,5 +149,5 @@ class MainActivity : AppCompatActivity() {
             .create()
             .show()
     }
-
+*/
 }
